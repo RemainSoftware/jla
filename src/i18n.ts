@@ -104,6 +104,10 @@ export interface LocalizedStrings {
     'tooltip.cause': string;
     'tooltip.recovery': string;
 
+    // Pagination
+    'tree.messages': string;
+    'tree.showMore': string;
+
     // Document symbols
     'symbol.job': string;
     'symbol.summary': string;
@@ -184,6 +188,10 @@ const defaultStrings: LocalizedStrings = {
     'tooltip.message': 'Message',
     'tooltip.cause': 'Cause',
     'tooltip.recovery': 'Recovery',
+
+    // Pagination
+    'tree.messages': 'Messages {0}-{1}',
+    'tree.showMore': 'Show more...',
 
     // Document symbols
     'symbol.job': 'Job: {0}',

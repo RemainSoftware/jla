@@ -769,10 +769,41 @@ function getEndCodeDescription(endCode: number): string {
 
 /**
  * Extract processing time from job end message
+ * Handles multiple languages:
+ * - English: "X.XX seconds used"
+ * - Dutch: "X,XX sec. gebruikt" or "X,XX seconden"
+ * - German: "X,XX Sekunden"
+ * - Spanish: "X,XX segundos"
  */
 function extractProcessingTime(text: string): string | undefined {
-    const match = text.match(/([\d.]+)\s*seconds?\s*used/i);
-    return match ? `${match[1]} seconds` : undefined;
+    // Try English format first (dot decimal separator)
+    let match = text.match(/([\d.]+)\s*seconds?\s*used/i);
+    if (match) {
+        return `${match[1]} seconds`;
+    }
+    
+    // Try Dutch format: "X,XX sec. gebruikt" or "X,XX seconden"
+    match = text.match(/([\d,]+)\s*(?:sec\.|seconden)\s*(?:gebruikt|processortijd)/i);
+    if (match) {
+        const value = match[1].replace(',', '.');
+        return `${value} seconds`;
+    }
+    
+    // Try German format: "X,XX Sekunden"
+    match = text.match(/([\d,]+)\s*Sekunden/i);
+    if (match) {
+        const value = match[1].replace(',', '.');
+        return `${value} seconds`;
+    }
+    
+    // Try Spanish format: "X,XX segundos"
+    match = text.match(/([\d,]+)\s*segundos/i);
+    if (match) {
+        const value = match[1].replace(',', '.');
+        return `${value} seconds`;
+    }
+    
+    return undefined;
 }
 
 /**

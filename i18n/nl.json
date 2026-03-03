@@ -54,6 +54,8 @@
   "tree.programTermination": "Programma beëindigingsberichten",
   "tree.errorMessages": "Foutmeldingen",
   "tree.line": "Regel {0}",
+  "tree.messages": "Berichten {0}-{1}",
+  "tree.showMore": "Meer tonen...",
 
   "tooltip.severity": "Ernst",
   "tooltip.time": "Tijd",

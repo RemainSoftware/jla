@@ -143,7 +143,7 @@ export interface FilterOptions {
  * Tree item data for the TreeDataProvider
  */
 export interface TreeItemData {
-    type: 'root' | 'category' | 'messageGroup' | 'message';
+    type: 'root' | 'category' | 'messageGroup' | 'message' | 'page';
     label: string;
     description?: string;
     message?: JobLogMessage;
@@ -152,6 +152,10 @@ export interface TreeItemData {
     severity?: number;
     icon?: string;
     iconColor?: 'error' | 'warning' | 'success';
+    // Pagination support for large message groups
+    messages?: JobLogMessage[];  // Messages for this page
+    pageStart?: number;         // Start index (0-based)
+    pageSize?: number;          // Number of items per page
 }
 
 /**

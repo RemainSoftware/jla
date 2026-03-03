@@ -30,6 +30,11 @@ import { parseJobLog, groupMessages, filterMessages, getHighPriorityMessages } f
 import { t } from './i18n';
 
 /**
+ * Page size for paginating large message groups
+ */
+const PAGE_SIZE = 100;
+
+/**
  * Tree item for the Job Log Detective view
  */
 export class JobLogTreeItem extends vscode.TreeItem {
@@ -154,6 +159,10 @@ export class JobLogTreeItem extends vscode.TreeItem {
                 return new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor('errorForeground'));
             }
             return new vscode.ThemeIcon('symbol-constant');
+        }
+        
+        if (this.data.type === 'page') {
+            return new vscode.ThemeIcon('list-flat');
         }
         
         if (this.data.type === 'message' && this.message) {
@@ -315,11 +324,17 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
     
     /**
      * Get current filter summary
+     * Only shows active filters that actually affect the results
      */
     public getFilterSummary(): string {
         const filters: string[] = [];
-        if (this.hideCommand) {
-            filters.push(t('filter.commandHidden'));
+        
+        // Only show "Command hidden" if there are actually Command messages to hide
+        if (this.hideCommand && this.parsedLog) {
+            const commandCount = this.parsedLog.stats.byType.get('Command') || 0;
+            if (commandCount > 0) {
+                filters.push(t('filter.commandHidden'));
+            }
         }
         if (this.filterTypes.size > 0) {
             filters.push(`${t('filter.types')}: ${Array.from(this.filterTypes).join(', ')}`);
@@ -355,12 +370,30 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
             return Promise.resolve(this.getRootItems());
         }
         
+        // Handle pagination: if element has messages array, create children on demand
+        if (element.data.messages && element.data.messages.length > 0) {
+            const pageStart = element.data.pageStart ?? 0;
+            const pageSize = element.data.pageSize ?? PAGE_SIZE;
+            const pageMessages = element.data.messages.slice(pageStart, pageStart + pageSize);
+            
+            return Promise.resolve(
+                pageMessages.map(msg => {
+                    const data = this.createMessageData(msg);
+                    return new JobLogTreeItem(data, vscode.TreeItemCollapsibleState.None, msg);
+                })
+            );
+        }
+        
         if (element.data.children) {
             return Promise.resolve(
                 element.data.children.map(child => {
-                    const state = child.children && child.children.length > 0
-                        ? vscode.TreeItemCollapsibleState.Collapsed
-                        : vscode.TreeItemCollapsibleState.None;
+                    // Determine collapsible state based on type and content
+                    let state = vscode.TreeItemCollapsibleState.None;
+                    if (child.children && child.children.length > 0) {
+                        state = vscode.TreeItemCollapsibleState.Collapsed;
+                    } else if (child.type === 'page' && child.messages && child.messages.length > 0) {
+                        state = vscode.TreeItemCollapsibleState.Collapsed;
+                    }
                     return new JobLogTreeItem(child, state, child.message);
                 })
             );
@@ -407,7 +440,7 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
                 type: 'category',
                 label: t('tree.highPriority', highPriority.length),
                 description: t('tree.recentHighSeverity'),
-                children: highPriority.map(msg => this.createMessageData(msg))
+                children: this.createPaginatedChildren(highPriority)
             };
             items.push(new JobLogTreeItem(highPriorityData, vscode.TreeItemCollapsibleState.Expanded));
         }
@@ -439,13 +472,14 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
                 const idMessages = idGroups.get(msgId) || [];
                 const maxSeverity = Math.max(...idMessages.map(m => m.severity));
                 
+                // Use pagination for large groups to avoid UI freezes
                 const idData: TreeItemData = {
                     type: 'messageGroup',
                     label: `${msgId} (${idMessages.length})`,
                     description: maxSeverity > 0 ? `SEV ${maxSeverity}` : undefined,
                     severity: maxSeverity,
                     count: idMessages.length,
-                    children: idMessages.map(msg => this.createMessageData(msg))
+                    children: this.createPaginatedChildren(idMessages)
                 };
                 children.push(idData);
             }
@@ -482,6 +516,40 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
             message: msg,
             severity: msg.severity
         };
+    }
+    
+    /**
+     * Create paginated children for large message groups
+     * For small groups (<=PAGE_SIZE), returns message data directly
+     * For large groups, returns page nodes that load messages on demand
+     */
+    private createPaginatedChildren(messages: JobLogMessage[]): TreeItemData[] {
+        // Small group: no pagination needed
+        if (messages.length <= PAGE_SIZE) {
+            return messages.map(msg => this.createMessageData(msg));
+        }
+        
+        // Large group: create page nodes
+        const pages: TreeItemData[] = [];
+        const totalPages = Math.ceil(messages.length / PAGE_SIZE);
+        
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            const start = pageIndex * PAGE_SIZE;
+            const end = Math.min(start + PAGE_SIZE, messages.length);
+            const pageMessages = messages.slice(start, end);
+            
+            pages.push({
+                type: 'page',
+                label: t('tree.messages', start + 1, end),
+                description: `${pageMessages.length} items`,
+                messages: pageMessages,
+                pageStart: 0,  // Within this page's messages array
+                pageSize: PAGE_SIZE,
+                icon: 'list-flat'
+            });
+        }
+        
+        return pages;
     }
     
     /**
