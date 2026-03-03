@@ -4,13 +4,15 @@ A VS Code extension for analyzing IBM i job logs. Quickly find errors and issues
 
 ## Features
 
-- **Automatic Detection**: Automatically detects IBM i job log files by content or filename pattern
+![Analysis View](images/analysis-view.png)
+
+- **Custom Tree View**: Dedicated "Job Log Analyzer" panel with filtering and navigation (1)
+- **Smart Analysis**: Highlights high-severity messages and analyses the log for errors (1)
+- **Outline View Integration**: View messages grouped by type and message ID in the VS Code Outline (2)
+- **Quick Navigation**: Click on any message to jump to its location in the file (3)
+- **Rich Tooltips**: Hover over messages to see full details including cause and recovery (4)
+- **Automatic Detection**: Automatically detects IBM i job log files by content or filename pattern (5)
 - **Multi-Language Support**: Parses job logs in English, German, French, and Spanish
-- **Outline View Integration**: View messages grouped by type and message ID in the VS Code Outline
-- **Custom Tree View**: Dedicated "Job Log Analyzer" panel with filtering and navigation
-- **Smart Analysis**: Highlights high-severity messages and focuses on recent errors
-- **Quick Navigation**: Click on any message to jump to its location in the file
-- **Rich Tooltips**: Hover over messages to see full details including cause and recovery
 
 ## Supported Languages
 
@@ -23,8 +25,6 @@ The extension automatically detects and parses job logs in:
 | Dutch | Taaklogboek | Opdracht, Voltooiing, Diagnose, Afbreken, Informatie, etc. |
 | French | Historique des travaux | Commande, Achèvement, Diagnostic, Echappement, Information, etc. |
 | Spanish | Mostrar registro trabajo | Mandato, Terminación, Diagnóstico, Escape, Informativo, etc. |
-
-Message types are automatically normalized to English internally for consistent filtering and display.
 
 ## Message Types
 
@@ -89,6 +89,9 @@ npm install
 # Compile
 npm run compile
 
+# Test
+npx vitest run
+
 # Watch for changes
 npm run watch
 
@@ -96,7 +99,7 @@ npm run watch
 Press F5 in VS Code
 ```
 
-### Adding New Languages
+### Adding New Parsing Languages
 
 To add support for a new language, edit `src/localization.ts`:
 
@@ -120,6 +123,10 @@ const NEW_LANGUAGE: LanguageDefinition = {
     }
 };
 ```
+
+## National Language Support
+
+Translations can be added to the i18n directory.
 
 ## License
 

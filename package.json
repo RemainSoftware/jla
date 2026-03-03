@@ -2,9 +2,13 @@
   "name": "joblog-analyzer",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "publisher": "remainsoftware",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RemainSoftware/jla.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
