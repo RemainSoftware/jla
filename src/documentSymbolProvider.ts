@@ -25,7 +25,7 @@
 // DocumentSymbolProvider for Job Log Analyzer - provides Outline view integration
 
 import * as vscode from 'vscode';
-import { ParsedJobLog, JobLogMessage } from './types';
+import { ParsedJobLog } from './types';
 import { parseJobLog, groupMessages } from './joblogParser';
 import { t } from './i18n';
 
@@ -147,7 +147,7 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
         const typeSymbols: vscode.DocumentSymbol[] = [];
         
         for (const [type, msgs] of typeGroups) {
-            if (msgs.length === 0) continue;
+            if (msgs.length === 0) {continue;}
             
             const firstMsg = msgs[0];
             const lastMsg = msgs[msgs.length - 1];
@@ -168,7 +168,7 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
             const idGroups = groupMessages(msgs, m => m.messageId);
             
             for (const [msgId, idMsgs] of idGroups) {
-                if (idMsgs.length === 0) continue;
+                if (idMsgs.length === 0) {continue;}
                 
                 const firstIdMsg = idMsgs[0];
                 const lastIdMsg = idMsgs[idMsgs.length - 1];
@@ -263,15 +263,15 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
      * Get priority for sorting types (lower = higher priority)
      */
     private getTypePriority(typeName: string): number {
-        if (typeName.startsWith('Escape')) return 1;
-        if (typeName.startsWith('Diagnostic')) return 2;
-        if (typeName.startsWith('Information')) return 3;
-        if (typeName.startsWith('Inquiry')) return 4;
-        if (typeName.startsWith('Notify')) return 5;
-        if (typeName.startsWith('Completion')) return 6;
-        if (typeName.startsWith('Reply')) return 7;
-        if (typeName.startsWith('Request')) return 8;
-        if (typeName.startsWith('Command')) return 9;
+        if (typeName.startsWith('Escape')) {return 1;}
+        if (typeName.startsWith('Diagnostic')) {return 2;}
+        if (typeName.startsWith('Information')) {return 3;}
+        if (typeName.startsWith('Inquiry')) {return 4;}
+        if (typeName.startsWith('Notify')) {return 5;}
+        if (typeName.startsWith('Completion')) {return 6;}
+        if (typeName.startsWith('Reply')) {return 7;}
+        if (typeName.startsWith('Request')) {return 8;}
+        if (typeName.startsWith('Command')) {return 9;}
         return 10;
     }
 }

@@ -1,0 +1,27 @@
+# Development files
+.vscode/**
+.github/**
+src/**
+test/**
+node_modules/**
+.gitignore
+
+# Build configuration
+tsconfig.json
+vitest.config.ts
+eslint.config.js
+.eslintrc*
+
+# Documentation (keep README.md)
+Ai.MD
+CHANGELOG.md
+
+# Package files
+package-lock.json
+*.vsix
+
+# Test fixtures (not needed at runtime)
+# Note: i18n folder IS needed for translations
+
+# Source maps (optional - remove if you want debugging)
+**/*.map
