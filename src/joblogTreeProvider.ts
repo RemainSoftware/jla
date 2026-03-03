@@ -27,6 +27,7 @@
 import * as vscode from 'vscode';
 import { ParsedJobLog, JobLogMessage, JobLogStats, TreeItemData, JobCompletionStatus } from './types';
 import { parseJobLog, groupMessages, filterMessages, getHighPriorityMessages } from './joblogParser';
+import { t } from './i18n';
 
 /**
  * Tree item for the Job Log Analyzer view
@@ -45,7 +46,7 @@ export class JobLogTreeItem extends vscode.TreeItem {
         if (message) {
             this.command = {
                 command: 'joblogAnalyzer.goToMessage',
-                title: 'Go to Message',
+                title: t('tree.goToMessage'),
                 arguments: [message]
             };
         }
@@ -60,11 +61,11 @@ export class JobLogTreeItem extends vscode.TreeItem {
         
         const md = new vscode.MarkdownString();
         md.appendMarkdown(`**${this.message.messageId}** - ${this.message.type}\n\n`);
-        md.appendMarkdown(`**Severity:** ${this.message.severity}\n\n`);
-        md.appendMarkdown(`**Time:** ${this.message.date} ${this.message.time}\n\n`);
+        md.appendMarkdown(`**${t('tooltip.severity')}:** ${this.message.severity}\n\n`);
+        md.appendMarkdown(`**${t('tooltip.time')}:** ${this.message.date} ${this.message.time}\n\n`);
         
         if (this.message.from.program) {
-            md.appendMarkdown(`**From:** ${this.message.from.program}`);
+            md.appendMarkdown(`**${t('tooltip.from')}:** ${this.message.from.program}`);
             if (this.message.from.library) {
                 md.appendMarkdown(` (${this.message.from.library})`);
             }
@@ -75,7 +76,7 @@ export class JobLogTreeItem extends vscode.TreeItem {
         }
         
         if (this.message.to.program) {
-            md.appendMarkdown(`**To:** ${this.message.to.program}`);
+            md.appendMarkdown(`**${t('tooltip.to')}:** ${this.message.to.program}`);
             if (this.message.to.library) {
                 md.appendMarkdown(` (${this.message.to.library})`);
             }
@@ -86,15 +87,15 @@ export class JobLogTreeItem extends vscode.TreeItem {
         }
         
         if (this.message.messageText) {
-            md.appendMarkdown(`**Message:**\n${this.message.messageText}\n\n`);
+            md.appendMarkdown(`**${t('tooltip.message')}:**\n${this.message.messageText}\n\n`);
         }
         
         if (this.message.cause) {
-            md.appendMarkdown(`**Cause:**\n${this.message.cause}\n\n`);
+            md.appendMarkdown(`**${t('tooltip.cause')}:**\n${this.message.cause}\n\n`);
         }
         
         if (this.message.recovery) {
-            md.appendMarkdown(`**Recovery:**\n${this.message.recovery}\n\n`);
+            md.appendMarkdown(`**${t('tooltip.recovery')}:**\n${this.message.recovery}\n\n`);
         }
         
         return md;
@@ -311,18 +312,18 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
     public getFilterSummary(): string {
         const filters: string[] = [];
         if (this.filterTypes.size > 0) {
-            filters.push(`Types: ${Array.from(this.filterTypes).join(', ')}`);
+            filters.push(`${t('filter.types')}: ${Array.from(this.filterTypes).join(', ')}`);
         }
         if (this.messageIdPattern) {
-            filters.push(`ID: ${this.messageIdPattern}`);
+            filters.push(`${t('filter.id')}: ${this.messageIdPattern}`);
         }
         if (this.showHighSeverityOnly) {
-            filters.push('High severity only');
+            filters.push(t('filter.highSeverityOnly'));
         }
         if (this.minSeverity > 0) {
-            filters.push(`Min SEV: ${this.minSeverity}`);
+            filters.push(`${t('filter.minSeverity')}: ${this.minSeverity}`);
         }
-        return filters.length > 0 ? filters.join('; ') : 'No filters';
+        return filters.length > 0 ? filters.join('; ') : t('filter.noFilters');
     }
     
     /**
@@ -380,12 +381,12 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
         
         // Add summary item
         const filterSummary = this.getFilterSummary();
-        const summaryDesc = filterSummary !== 'No filters' 
+        const summaryDesc = filterSummary !== t('filter.noFilters') 
             ? `${messages.length} of ${this.parsedLog.messages.length} | ${filterSummary}`
-            : `${messages.length} messages`;
+            : t('symbol.messages', messages.length);
         const summaryData: TreeItemData = {
             type: 'category',
-            label: 'Summary',
+            label: t('tree.summary'),
             description: summaryDesc,
             children: this.createStatsChildren(this.parsedLog.stats, this.parsedLog.completion)
         };
@@ -396,8 +397,8 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
         if (highPriority.length > 0) {
             const highPriorityData: TreeItemData = {
                 type: 'category',
-                label: `High Priority (${highPriority.length})`,
-                description: 'Recent high severity messages',
+                label: t('tree.highPriority', highPriority.length),
+                description: t('tree.recentHighSeverity'),
                 children: highPriority.map(msg => this.createMessageData(msg))
             };
             items.push(new JobLogTreeItem(highPriorityData, vscode.TreeItemCollapsibleState.Expanded));
@@ -464,7 +465,7 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
         const timeStr = msg.time.split('.')[0]; // Remove microseconds
         const shortText = msg.messageText
             ? msg.messageText.substring(0, 50) + (msg.messageText.length > 50 ? '...' : '')
-            : `Line ${msg.lineNumber}`;
+            : t('tree.line', msg.lineNumber);
         
         return {
             type: 'message',
@@ -485,8 +486,8 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
         if (completion) {
             const statusIcon = completion.success ? '✓' : '✗';
             const statusLabel = completion.success 
-                ? `${statusIcon} Job Completed Successfully` 
-                : `${statusIcon} Job Ended Abnormally (End Code ${completion.endCode})`;
+                ? `${statusIcon} ${t('tree.jobCompletedSuccessfully')}` 
+                : `${statusIcon} ${t('tree.jobEndedAbnormally', completion.endCode)}`;
             children.push({
                 type: 'root',
                 label: statusLabel,
@@ -498,30 +499,30 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
             if (completion.processingTime) {
                 children.push({
                     type: 'root',
-                    label: `Processing Time: ${completion.processingTime}`,
+                    label: t('tree.processingTime', completion.processingTime),
                 });
             }
         }
         
         children.push({
             type: 'root',
-            label: `Total: ${stats.totalMessages}`,
-            description: `(${stats.highSeverityCount} high severity)`
+            label: t('tree.total', stats.totalMessages),
+            description: `(${t('status.highSeverity', stats.highSeverityCount)})`
         });
         
         if (stats.escapeCount > 0) {
             children.push({
                 type: 'root',
-                label: `Escape: ${stats.escapeCount}`,
-                description: 'Program termination messages'
+                label: t('tree.escape', stats.escapeCount),
+                description: t('tree.programTermination')
             });
         }
         
         if (stats.diagnosticCount > 0) {
             children.push({
                 type: 'root',
-                label: `Diagnostic: ${stats.diagnosticCount}`,
-                description: 'Error messages'
+                label: t('tree.diagnostic', stats.diagnosticCount),
+                description: t('tree.errorMessages')
             });
         }
         

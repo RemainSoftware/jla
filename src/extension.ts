@@ -29,6 +29,7 @@ import { detectJobLog } from './joblogParser';
 import { JobLogDocumentSymbolProvider } from './documentSymbolProvider';
 import { JobLogTreeDataProvider } from './joblogTreeProvider';
 import { JobLogMessage } from './types';
+import { initializeI18n, t, getMessageTypes, getMessageTypeKey } from './i18n';
 
 let documentSymbolProvider: JobLogDocumentSymbolProvider;
 let treeDataProvider: JobLogTreeDataProvider;
@@ -37,7 +38,10 @@ let treeDataProvider: JobLogTreeDataProvider;
  * Activate the extension
  */
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Job Log Analyzer is now active');
+    // Initialize i18n
+    initializeI18n(context.extensionPath);
+    
+    console.log(t('extension.activated'));
     
     // Create providers
     documentSymbolProvider = new JobLogDocumentSymbolProvider();
@@ -88,7 +92,7 @@ function registerCommands(
         vscode.commands.registerCommand('joblogAnalyzer.analyze', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
-                vscode.window.showWarningMessage('No active editor');
+                vscode.window.showWarningMessage(t('editor.noActiveEditor'));
                 return;
             }
             await setDocumentAsJobLog(editor.document, treeDataProvider);
@@ -100,7 +104,7 @@ function registerCommands(
         vscode.commands.registerCommand('joblogAnalyzer.setAsJobLog', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
-                vscode.window.showWarningMessage('No active editor');
+                vscode.window.showWarningMessage(t('editor.noActiveEditor'));
                 return;
             }
             await setDocumentAsJobLog(editor.document, treeDataProvider);
@@ -146,52 +150,28 @@ function registerCommands(
             
             editor.setDecorations(decorationType, [range]);
             
-            // Remove decoration after 2 seconds
+            // Remove decoration after 3 seconds
             setTimeout(() => {
                 decorationType.dispose();
-            }, 2000);
-            
-            // Show message details in information message
-            if (message.messageText || message.cause) {
-                const detail = [
-                    message.messageText,
-                    message.cause ? `Cause: ${message.cause}` : undefined,
-                    message.recovery ? `Recovery: ${message.recovery}` : undefined
-                ].filter(Boolean).join('\n\n');
-                
-                vscode.window.showInformationMessage(
-                    `${message.messageId} (SEV ${message.severity})`,
-                    { modal: false, detail }
-                );
-            }
+            }, 3000);
         })
     );
     
     // Filter by type command
     context.subscriptions.push(
         vscode.commands.registerCommand('joblogAnalyzer.filterByType', async () => {
-            const types = [
-                'Escape',
-                'Diagnostic',
-                'Information',
-                'Completion',
-                'Command',
-                'Request',
-                'Inquiry',
-                'Reply',
-                'Notify',
-                'Sender Copy'
-            ];
+            const types = getMessageTypes();
             
             const selected = await vscode.window.showQuickPick(types, {
-                placeHolder: 'Select message type to filter',
+                placeHolder: t('filter.selectMessageType'),
                 canPickMany: true
             });
             
             if (selected) {
                 treeDataProvider.clearTypeFilters();
                 for (const type of selected) {
-                    treeDataProvider.toggleTypeFilter(type);
+                    // Convert localized name back to internal key
+                    treeDataProvider.toggleTypeFilter(getMessageTypeKey(type));
                 }
             }
         })
@@ -209,15 +189,15 @@ function registerCommands(
         vscode.commands.registerCommand('joblogAnalyzer.filterByMessageId', async () => {
             const currentPattern = treeDataProvider.getMessageIdPattern();
             const pattern = await vscode.window.showInputBox({
-                prompt: 'Enter message ID pattern (e.g., SQL*, CPF*, *0001)',
-                placeHolder: 'SQL*, CPF*, *ERROR*',
+                prompt: t('filter.enterMessageIdPattern'),
+                placeHolder: t('filter.messageIdPatternPlaceholder'),
                 value: currentPattern,
                 validateInput: (value) => {
                     // Allow empty to clear filter
                     if (!value) {return null;}
                     // Basic validation - alphanumeric with * and ?
                     if (!/^[\w*?]+$/.test(value)) {
-                        return 'Pattern should only contain letters, numbers, * (any chars) and ? (single char)';
+                        return t('filter.patternValidationError');
                     }
                     return null;
                 }
@@ -240,14 +220,14 @@ function registerCommands(
     context.subscriptions.push(
         vscode.commands.registerCommand('joblogAnalyzer.openFilterMenu', async () => {
             const options = [
-                { label: '$(filter) Filter by Message Type...', command: 'joblogAnalyzer.filterByType' },
-                { label: '$(search) Filter by Message ID Pattern...', command: 'joblogAnalyzer.filterByMessageId' },
-                { label: '$(warning) Show High Severity Only', command: 'joblogAnalyzer.showHighSeverity' },
-                { label: '$(clear-all) Clear All Filters', command: 'joblogAnalyzer.clearFilters' }
+                { label: `$(filter) ${t('filter.filterByType')}`, command: 'joblogAnalyzer.filterByType' },
+                { label: `$(search) ${t('filter.filterByMessageId')}`, command: 'joblogAnalyzer.filterByMessageId' },
+                { label: `$(warning) ${t('filter.showHighSeverity')}`, command: 'joblogAnalyzer.showHighSeverity' },
+                { label: `$(clear-all) ${t('filter.clearAllFilters')}`, command: 'joblogAnalyzer.clearFilters' }
             ];
             
             const selected = await vscode.window.showQuickPick(options, {
-                placeHolder: 'Select filter option'
+                placeHolder: t('filter.selectFilterOption')
             });
             
             if (selected) {
@@ -365,26 +345,26 @@ async function setDocumentAsJobLog(
         const highSev = parsed.stats.highSeverityCount;
         
         vscode.window.setStatusBarMessage(
-            `Job Log: ${parsed.messages.length} messages, ${highSev} high severity, parsed in ${parsed.parseTime}ms`,
+            `${t('status.jobLog')}: ${t('status.messagesCount', parsed.messages.length)}, ${t('status.highSeverity', highSev)}, ${t('status.parsedIn', parsed.parseTime)}`,
             5000
         );
         
         // Check for abnormal job ending
-        const jobEnded = parsed.completion?.completed;
+        // const jobEnded = parsed.completion?.completed;
         const jobFailed = parsed.completion && !parsed.completion.success;
         
         // Show warning if there are errors or job ended abnormally
         if (escapeMsgs > 0 || diagMsgs > 0 || jobFailed) {
-            let message = `Job Log Analysis: Found ${escapeMsgs} Escape and ${diagMsgs} Diagnostic messages`;
+            let message = t('status.analysisFound', escapeMsgs, diagMsgs);
             if (jobFailed) {
-                message = `⚠️ Job Ended Abnormally (End Code ${parsed.completion!.endCode}). ${message}`;
+                message = `⚠️ ${t('status.jobEndedAbnormally', parsed.completion!.endCode)}. ${message}`;
             }
             
             vscode.window.showWarningMessage(
                 message,
-                'Show Job Log'
+                t('status.showLogAnalysis')
             ).then(selection => {
-                if (selection === 'Show Job Log') {
+                if (selection === t('status.showLogAnalysis')) {
                     // Clear any filters and show all messages
                     treeDataProvider.clearAllFilters();
                     // Reveal the Job Log Analyzer view
@@ -415,5 +395,5 @@ function isJobLogDocument(document: vscode.TextDocument): boolean {
  * Deactivate the extension
  */
 export function deactivate() {
-    console.log('Job Log Analyzer deactivated');
+    console.log(t('extension.deactivated'));
 }

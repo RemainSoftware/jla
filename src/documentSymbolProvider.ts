@@ -27,6 +27,7 @@
 import * as vscode from 'vscode';
 import { ParsedJobLog, JobLogMessage } from './types';
 import { parseJobLog, groupMessages } from './joblogParser';
+import { t } from './i18n';
 
 /**
  * Provides document symbols for job log files, enabling the Outline view
@@ -108,7 +109,7 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
         if (parsed.header) {
             const headerRange = new vscode.Range(0, 0, 2, 0);
             const headerSymbol = new vscode.DocumentSymbol(
-                `Job: ${parsed.header.jobNumber}/${parsed.header.user}/${parsed.header.jobName}`,
+                t('symbol.job', `${parsed.header.jobNumber}/${parsed.header.user}/${parsed.header.jobName}`),
                 `${parsed.header.systemName} - ${parsed.header.version}`,
                 vscode.SymbolKind.File,
                 headerRange,
@@ -120,8 +121,8 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
         // Create summary symbol
         const summaryRange = new vscode.Range(0, 0, 0, 0);
         const summarySymbol = new vscode.DocumentSymbol(
-            `Summary`,
-            `${messages.length} messages, ${parsed.stats.highSeverityCount} high severity`,
+            t('symbol.summary'),
+            `${t('symbol.messages', messages.length)}, ${t('status.highSeverity', parsed.stats.highSeverityCount)}`,
             vscode.SymbolKind.Namespace,
             summaryRange,
             summaryRange
@@ -133,7 +134,7 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
             const highSev = msgs.filter(m => m.severity >= highSeverityThreshold).length;
             const typeSymbol = new vscode.DocumentSymbol(
                 type,
-                `${msgs.length} messages${highSev > 0 ? ` (${highSev} high severity)` : ''}`,
+                `${t('symbol.messages', msgs.length)}${highSev > 0 ? ` (${t('status.highSeverity', highSev)})` : ''}`,
                 this.getSymbolKindForType(type),
                 summaryRange,
                 summaryRange
@@ -194,7 +195,7 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
                     
                     const description = msg.messageText 
                         ? msg.messageText.substring(0, 60) + (msg.messageText.length > 60 ? '...' : '')
-                        : `Line ${msg.lineNumber}`;
+                        : t('tree.line', msg.lineNumber);
                     
                     const msgSymbol = new vscode.DocumentSymbol(
                         `${msg.time.split('.')[0]}`,
