@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "publisher": "remainsoftware",
+  "icon": "images/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/RemainSoftware/jla.git"

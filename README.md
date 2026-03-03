@@ -1,4 +1,4 @@
-# Job Log Analyzer
+# Job Log Detective
 
 A VS Code extension for analyzing IBM i job logs. Quickly find errors and issues in large job log files.
 
@@ -6,7 +6,7 @@ A VS Code extension for analyzing IBM i job logs. Quickly find errors and issues
 
 ![Analysis View](images/analysis-view.png)
 
-- **Custom Tree View**: Dedicated "Job Log Analyzer" panel with filtering and navigation (1)
+- **Custom Tree View**: Dedicated "Job Log Detective" panel with filtering and navigation (1)
 - **Smart Analysis**: Highlights high-severity messages and analyses the log for errors (1)
 - **Outline View Integration**: View messages grouped by type and message ID in the VS Code Outline (2)
 - **Quick Navigation**: Click on any message to jump to its location in the file (3)
@@ -44,7 +44,7 @@ The extension recognizes all IBM i message types:
 
 1. Open a job log file (files named `QPJOBLOG` or containing IBM i job log format)
 2. The extension will automatically detect and analyze the file
-3. Use the **Outline** view or **Job Log Analyzer** panel to navigate
+3. Use the **Outline** view or **Job Log Detective** panel to navigate
 4. Click on messages to jump to their location
 5. Use the filter buttons to focus on specific message types or severity levels
 
@@ -52,7 +52,7 @@ The extension recognizes all IBM i message types:
 
 If automatic detection doesn't work:
 1. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-2. Run "Job Log Analyzer: Set as IBM i Job Log"
+2. Run "Job Log Detective: Set as IBM i Job Log"
 
 ## Configuration
 
@@ -64,11 +64,11 @@ If automatic detection doesn't work:
 
 ## Commands
 
-- **Job Log Analyzer: Analyze Job Log** - Manually trigger analysis
-- **Job Log Analyzer: Set as IBM i Job Log** - Force the current file to be treated as a job log
-- **Job Log Analyzer: Refresh Analysis** - Re-parse and refresh the analysis
-- **Job Log Analyzer: Filter by Message Type** - Filter to specific message types
-- **Job Log Analyzer: Show High Severity Only** - Toggle to show only high severity messages
+- **Job Log Detective: Analyze Job Log** - Manually trigger analysis
+- **Job Log Detective: Set as IBM i Job Log** - Force the current file to be treated as a job log
+- **Job Log Detective: Refresh Analysis** - Re-parse and refresh the analysis
+- **Job Log Detective: Filter by Message Type** - Filter to specific message types
+- **Job Log Detective: Show High Severity Only** - Toggle to show only high severity messages
 
 ## File Detection
 
