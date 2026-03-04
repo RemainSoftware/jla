@@ -24,10 +24,13 @@
   "command.openFilterMenu.category": "Job Log Detective",
   "command.toggleCommandMessages.title": "Opdrachtberichten in-/uitschakelen",
   "command.toggleCommandMessages.category": "Job Log Detective",
+  "command.toggleDecorations.title": "Editor-decoraties in-/uitschakelen",
+  "command.toggleDecorations.category": "Job Log Detective",
   "viewContainer.title": "Job Log Detective",
   "view.joblogDetective.name": "Job Log Detective",
   "config.title": "Job Log Detective",
   "config.highSeverityThreshold.description": "Berichten met ernst >= deze waarde worden als hoge ernst beschouwd",
   "config.hideCommandMessages.description": "Opdrachtberichten standaard verbergen in de analyseweergave",
-  "config.autoDetect.description": "Taakprotocolbestanden automatisch detecteren op basis van inhoud"
+  "config.autoDetect.description": "Taakprotocolbestanden automatisch detecteren op basis van inhoud",
+  "config.enableEditorDecorations.description": "Toon vlamiconen en markering in de editor voor taakprotocolberichten"
 }

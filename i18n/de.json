@@ -73,5 +73,8 @@
 
   "symbol.job": "Job: {0}",
   "symbol.summary": "Zusammenfassung",
-  "symbol.messages": "{0} Nachrichten"
+  "symbol.messages": "{0} Nachrichten",
+
+  "decorations.enabled": "Editor-Dekorationen aktiviert",
+  "decorations.disabled": "Editor-Dekorationen deaktiviert"
 }

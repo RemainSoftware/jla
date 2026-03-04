@@ -22,10 +22,13 @@
   "command.openFilterMenu.category": "Job Log Detectiv",
   "command.toggleCommandMessages.title": "Befehlsnachrichten umschalten",
   "command.toggleCommandMessages.category": "Job Log Detectiv",
+  "command.toggleDecorations.title": "Editor-Dekorationen umschalten",
+  "command.toggleDecorations.category": "Job Log Detectiv",
   "viewContainer.title": "Job Log Detectiv",
   "view.joblogDetective.name": "Job Log Detectiv",
   "config.title": "Job Log Detectiv",
   "config.highSeverityThreshold.description": "Nachrichten mit Schweregrad >= diesem Wert werden als hohe Schweregrad betrachtet",
   "config.hideCommandMessages.description": "Befehlsnachrichten standardmäßig in der Analyseansicht ausblenden",
-  "config.autoDetect.description": "Job-Log-Dateien automatisch nach Inhalt erkennen"
+  "config.autoDetect.description": "Job-Log-Dateien automatisch nach Inhalt erkennen",
+  "config.enableEditorDecorations.description": "Flammen-Symbole und Hervorhebungen im Editor für Job-Log-Nachrichten anzeigen"
 }

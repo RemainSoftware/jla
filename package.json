@@ -103,6 +103,12 @@
         "title": "%command.toggleCommandMessages.title%",
         "category": "%command.toggleCommandMessages.category%",
         "icon": "$(terminal)"
+      },
+      {
+        "command": "joblogDetective.toggleDecorations",
+        "title": "%command.toggleDecorations.title%",
+        "category": "%command.toggleDecorations.category%",
+        "icon": "$(paintcan)"
       }
     ],
     "viewsContainers": {
@@ -172,6 +178,11 @@
           "type": "boolean",
           "default": true,
           "description": "%config.autoDetect.description%"
+        },
+        "joblogDetective.enableEditorDecorations": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.enableEditorDecorations.description%"
         }
       }
     }

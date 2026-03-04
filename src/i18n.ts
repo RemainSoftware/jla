@@ -122,6 +122,10 @@ export interface LocalizedStrings {
     'symbol.job': string;
     'symbol.summary': string;
     'symbol.messages': string;
+
+    // Editor decorations
+    'decorations.enabled': string;
+    'decorations.disabled': string;
 }
 
 /**
@@ -216,7 +220,11 @@ const defaultStrings: LocalizedStrings = {
     // Document symbols
     'symbol.job': 'Job: {0}',
     'symbol.summary': 'Summary',
-    'symbol.messages': '{0} messages'
+    'symbol.messages': '{0} messages',
+
+    // Editor decorations
+    'decorations.enabled': 'Editor decorations enabled',
+    'decorations.disabled': 'Editor decorations disabled'
 };
 
 /**

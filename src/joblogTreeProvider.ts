@@ -360,6 +360,27 @@ export class JobLogTreeDataProvider implements vscode.TreeDataProvider<JobLogTre
     }
     
     /**
+     * Get the currently filtered messages based on active filters
+     * Used by the decoration provider to show decorations only for filtered messages
+     */
+    public getFilteredMessages(): JobLogMessage[] {
+        if (!this.parsedLog) {
+            return [];
+        }
+        
+        const config = vscode.workspace.getConfiguration('joblogDetective');
+        const highSeverityThreshold = config.get<number>('highSeverityThreshold', 30);
+        
+        return filterMessages(this.parsedLog.messages, {
+            hideCommand: this.hideCommand,
+            minSeverity: this.showHighSeverityOnly ? highSeverityThreshold : this.minSeverity,
+            types: this.filterTypes.size > 0 ? this.filterTypes : undefined,
+            messageIdPattern: this.messageIdPattern || undefined,
+            contentPattern: this.contentPattern || undefined
+        });
+    }
+    
+    /**
      * Get current filter summary
      * Only shows active filters that actually affect the results
      */

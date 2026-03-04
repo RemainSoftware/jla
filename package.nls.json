@@ -24,10 +24,13 @@
   "command.openFilterMenu.category": "Job Log Detective",
   "command.toggleCommandMessages.title": "Toggle Command Messages",
   "command.toggleCommandMessages.category": "Job Log Detective",
+  "command.toggleDecorations.title": "Toggle Editor Decorations",
+  "command.toggleDecorations.category": "Job Log Detective",
   "viewContainer.title": "Job Log Detective",
   "view.joblogDetective.name": "Job Log Detective",
   "config.title": "Job Log Detective",
   "config.highSeverityThreshold.description": "Messages with severity >= this value are considered high severity",
   "config.hideCommandMessages.description": "Hide Command type messages in the analysis view by default",
-  "config.autoDetect.description": "Automatically detect job log files by content"
+  "config.autoDetect.description": "Automatically detect job log files by content",
+  "config.enableEditorDecorations.description": "Show flame icons and highlighting in the editor for job log messages"
 }

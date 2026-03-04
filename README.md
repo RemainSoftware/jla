@@ -72,6 +72,25 @@ Buckets show 🔥 icons based on the percentage of high-severity messages:
 ### Message Types
 Messages grouped by type (Escape, Diagnostic, Information, etc.), then by message ID.
 
+## Editor Decorations
+
+The extension provides visual indicators directly in the editor for filtered job log messages:
+
+| Level | Icon | Background | Applies To |
+|-------|------|------------|------------|
+| Escape | 🔥 Red flame | Light red | Escape type messages |
+| High Severity | 🔥 Orange flame | Light orange | Messages with severity ≥ threshold |
+| Diagnostic | 🔥 Yellow flame | Light yellow | Diagnostic type messages |
+
+**Features:**
+- **Gutter icons**: Flame icons appear in the gutter next to relevant lines
+- **Background highlighting**: Subtle background colors (theme-aware for light/dark themes)
+- **Overview ruler**: Color markers on the scrollbar for quick navigation
+- **Minimap**: Color bands showing message locations
+- **Hover tooltips**: Message details when hovering over decorations
+
+Decorations automatically update when filters change, showing only the currently filtered messages.
+
 ## Usage
 
 1. Open a job log file (files named `QPJOBLOG` or containing IBM i job log format)
@@ -93,6 +112,7 @@ If automatic detection doesn't work:
 | `joblogDetective.highSeverityThreshold` | `30` | Messages with severity >= this value are highlighted |
 | `joblogDetective.hideCommandMessages` | `true` | Hide Command type messages by default |
 | `joblogDetective.autoDetect` | `true` | Automatically detect job log files by content |
+| `joblogDetective.enableEditorDecorations` | `true` | Show flame icons and highlighting in the editor |
 
 ## Commands
 
@@ -101,6 +121,7 @@ If automatic detection doesn't work:
 - **Job Log Detective: Refresh Analysis** - Re-parse and refresh the analysis
 - **Job Log Detective: Filter by Message Type** - Filter to specific message types
 - **Job Log Detective: Show High Severity Only** - Toggle to show only high severity messages
+- **Job Log Detective: Toggle Editor Decorations** - Enable/disable flame icons and highlighting
 
 ## File Detection
 

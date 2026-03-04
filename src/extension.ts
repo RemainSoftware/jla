@@ -28,11 +28,13 @@ import * as vscode from 'vscode';
 import { detectJobLog } from './joblogParser';
 import { JobLogDocumentSymbolProvider } from './documentSymbolProvider';
 import { JobLogTreeDataProvider } from './joblogTreeProvider';
+import { EditorDecorationProvider } from './editorDecorationProvider';
 import { JobLogMessage } from './types';
 import { initializeI18n, t, getMessageTypes, getMessageTypeKey } from './i18n';
 
 let documentSymbolProvider: JobLogDocumentSymbolProvider;
 let treeDataProvider: JobLogTreeDataProvider;
+let decorationProvider: EditorDecorationProvider;
 
 /**
  * Activate the extension
@@ -46,6 +48,10 @@ export function activate(context: vscode.ExtensionContext) {
     // Create providers
     documentSymbolProvider = new JobLogDocumentSymbolProvider();
     treeDataProvider = new JobLogTreeDataProvider();
+    decorationProvider = new EditorDecorationProvider(context.extensionPath);
+    
+    // Register decoration provider for disposal
+    context.subscriptions.push({ dispose: () => decorationProvider.dispose() });
     
     // Register document symbol provider for outline view
     const symbolProviderDisposable = vscode.languages.registerDocumentSymbolProvider(
@@ -68,6 +74,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(treeView);
     
+    // Update decorations when tree data changes (filters applied)
+    treeDataProvider.onDidChangeTreeData(() => {
+        updateEditorDecorations();
+    });
+    
     // Register commands
     registerCommands(context, treeDataProvider);
     
@@ -78,6 +89,28 @@ export function activate(context: vscode.ExtensionContext) {
     if (vscode.window.activeTextEditor) {
         checkAndSetJobLog(vscode.window.activeTextEditor.document, treeDataProvider);
     }
+}
+
+/**
+ * Update editor decorations based on current filtered messages
+ */
+function updateEditorDecorations(): void {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        return;
+    }
+    
+    // Check if this is a job log document
+    if (!isJobLogDocument(editor.document)) {
+        decorationProvider.clearDecorations(editor);
+        return;
+    }
+    
+    const config = vscode.workspace.getConfiguration('joblogDetective');
+    const highSeverityThreshold = config.get<number>('highSeverityThreshold', 30);
+    
+    const filteredMessages = treeDataProvider.getFilteredMessages();
+    decorationProvider.updateDecorations(editor, filteredMessages, highSeverityThreshold);
 }
 
 /**
@@ -263,6 +296,20 @@ function registerCommands(
             treeDataProvider.toggleHideCommand();
         })
     );
+    
+    // Toggle editor decorations
+    context.subscriptions.push(
+        vscode.commands.registerCommand('joblogDetective.toggleDecorations', () => {
+            const enabled = decorationProvider.toggle();
+            if (enabled) {
+                updateEditorDecorations();
+                vscode.window.showInformationMessage(t('decorations.enabled'));
+            } else {
+                decorationProvider.clearDecorations(vscode.window.activeTextEditor);
+                vscode.window.showInformationMessage(t('decorations.disabled'));
+            }
+        })
+    );
 }
 
 /**
@@ -280,6 +327,7 @@ function setupDocumentDetection(
             } else {
                 vscode.commands.executeCommand('setContext', 'joblogDetective.isJobLog', false);
                 treeDataProvider.setDocument(undefined);
+                decorationProvider.clearDecorations(undefined);
             }
         })
     );

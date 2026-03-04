@@ -75,5 +75,8 @@
 
   "symbol.job": "Taak: {0}",
   "symbol.summary": "Samenvatting",
-  "symbol.messages": "{0} berichten"
+  "symbol.messages": "{0} berichten",
+
+  "decorations.enabled": "Editor-decoraties ingeschakeld",
+  "decorations.disabled": "Editor-decoraties uitgeschakeld"
 }
