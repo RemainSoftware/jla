@@ -29,8 +29,9 @@ function createMessage(timestamp: Date, severity: number = 0): JobLogMessage {
         messageId: 'TEST001',
         type: 'Information',
         severity,
-        date: timestamp.toISOString().slice(0, 10),
-        time: timestamp.toTimeString().slice(0, 12),
+        // Use dummy strings that match the JobLogMessage date/time format
+        date: '28-02-26',
+        time: '13:10:12.467899',
         timestamp,
         from: { program: 'TEST', library: 'TESTLIB', instruction: '0000' },
         to: { program: 'TEST', library: 'TESTLIB', instruction: '0000' },
