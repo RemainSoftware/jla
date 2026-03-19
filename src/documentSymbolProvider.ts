@@ -299,7 +299,7 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
                 
                 const msgText = msg.messageText 
                     ? msg.messageText.substring(0, 50) + (msg.messageText.length > 50 ? '...' : '')
-                    : `Line ${msg.lineNumber}`;
+                    : t('tree.line', msg.lineNumber);
                 
                 const msgSymbol = new vscode.DocumentSymbol(
                     `${msg.time.split('.')[0]} - ${msg.messageId}`,
