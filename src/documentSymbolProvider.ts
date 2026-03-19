@@ -25,9 +25,10 @@
 // DocumentSymbolProvider for Job Log Detective - provides Outline view integration
 
 import * as vscode from 'vscode';
-import { ParsedJobLog } from './types';
+import { ParsedJobLog, JobLogMessage } from './types';
 import { parseJobLog, groupMessages } from './joblogParser';
 import { t } from './i18n';
+import { getFlameDecoration, determineBucketSize, groupMessagesByTimeBucket, formatBucketTime, getBucketStats } from './timelineUtils';
 
 /**
  * Provides document symbols for job log files, enabling the Outline view
@@ -224,9 +225,110 @@ export class JobLogDocumentSymbolProvider implements vscode.DocumentSymbolProvid
             return 0; // Keep original order otherwise
         });
         
+        // Add timeline section before type symbols
+        const timelineSymbol = this.createTimelineSymbol(document, messages, highSeverityThreshold);
+        if (timelineSymbol) {
+            symbols.push(timelineSymbol);
+        }
+        
         symbols.push(...typeSymbols);
         
         return symbols;
+    }
+    
+    /**
+     * Create timeline symbol with time-bucketed children
+     */
+    private createTimelineSymbol(
+        document: vscode.TextDocument,
+        messages: JobLogMessage[],
+        highSeverityThreshold: number
+    ): vscode.DocumentSymbol | null {
+        if (messages.length === 0) {
+            return null;
+        }
+        
+        // Sort messages by timestamp to get first/last for range
+        const sortedMessages = [...messages].sort((a, b) => 
+            a.timestamp.getTime() - b.timestamp.getTime()
+        );
+        
+        const firstMsg = sortedMessages[0];
+        const lastMsg = sortedMessages[sortedMessages.length - 1];
+        
+        // Calculate duration and determine bucket size using shared utility
+        const durationMs = lastMsg.timestamp.getTime() - firstMsg.timestamp.getTime();
+        const { bucketSizeMs } = determineBucketSize(durationMs);
+        
+        // Group messages into time buckets using shared utility
+        const timeBuckets = groupMessagesByTimeBucket(messages, bucketSizeMs);
+        
+        // Create timeline range
+        const timelineRange = new vscode.Range(
+            firstMsg.lineNumber - 1, 0,
+            lastMsg.endLineNumber - 1, 0
+        );
+        
+        const timelineSymbol = new vscode.DocumentSymbol(
+            t('symbol.timeline', messages.length),
+            t('symbol.timelineDesc'),
+            vscode.SymbolKind.Array,
+            timelineRange,
+            timelineRange
+        );
+        
+        // Convert buckets to child symbols
+        for (const bucket of timeBuckets) {
+            const timeStr = formatBucketTime(bucket.bucketTime);
+            const stats = getBucketStats(bucket.messages, highSeverityThreshold);
+            
+            // Build label with flame decoration using shared utility
+            const flames = getFlameDecoration(stats.highSeverityCount, stats.count);
+            const label = flames 
+                ? `${t('symbol.timeBucket', timeStr, stats.count)} ${flames}`
+                : t('symbol.timeBucket', timeStr, stats.count);
+            
+            const firstBucketMsg = bucket.messages[0];
+            const lastBucketMsg = bucket.messages[bucket.messages.length - 1];
+            const bucketRange = new vscode.Range(
+                firstBucketMsg.lineNumber - 1, 0,
+                lastBucketMsg.endLineNumber - 1, 0
+            );
+            
+            const bucketSymbol = new vscode.DocumentSymbol(
+                label,
+                stats.maxSeverity > 0 ? `SEV ${stats.maxSeverity}` : '',
+                stats.highSeverityCount > 0 ? vscode.SymbolKind.Event : vscode.SymbolKind.Variable,
+                bucketRange,
+                bucketRange
+            );
+            
+            // Add individual messages as children
+            for (const msg of bucket.messages) {
+                const msgRange = new vscode.Range(
+                    msg.lineNumber - 1, 0,
+                    msg.endLineNumber - 1, document.lineAt(Math.min(msg.endLineNumber - 1, document.lineCount - 1)).text.length
+                );
+                
+                const msgText = msg.messageText 
+                    ? msg.messageText.substring(0, 50) + (msg.messageText.length > 50 ? '...' : '')
+                    : `Line ${msg.lineNumber}`;
+                
+                const msgSymbol = new vscode.DocumentSymbol(
+                    `${msg.time.split('.')[0]} - ${msg.messageId}`,
+                    msgText,
+                    msg.severity >= highSeverityThreshold ? vscode.SymbolKind.Event : vscode.SymbolKind.Variable,
+                    msgRange,
+                    msgRange
+                );
+                
+                bucketSymbol.children.push(msgSymbol);
+            }
+            
+            timelineSymbol.children.push(bucketSymbol);
+        }
+        
+        return timelineSymbol;
     }
     
     /**

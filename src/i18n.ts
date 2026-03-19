@@ -122,6 +122,9 @@ export interface LocalizedStrings {
     'symbol.job': string;
     'symbol.summary': string;
     'symbol.messages': string;
+    'symbol.timeline': string;
+    'symbol.timelineDesc': string;
+    'symbol.timeBucket': string;
 
     // Editor decorations
     'decorations.enabled': string;
@@ -221,6 +224,9 @@ const defaultStrings: LocalizedStrings = {
     'symbol.job': 'Job: {0}',
     'symbol.summary': 'Summary',
     'symbol.messages': '{0} messages',
+    'symbol.timeline': 'Timeline ({0})',
+    'symbol.timelineDesc': 'Messages in chronological order',
+    'symbol.timeBucket': '{0} ({1})',
 
     // Editor decorations
     'decorations.enabled': 'Editor decorations enabled',
